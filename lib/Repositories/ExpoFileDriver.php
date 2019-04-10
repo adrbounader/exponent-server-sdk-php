@@ -32,14 +32,7 @@ class ExpoFileDriver implements ExpoRepository
      */
     public function store($key, $value): bool
     {
-        $storageInstance = null;
-
-        try {
-            $storageInstance = $this->getRepository();
-        } catch (\Exception $e) {
-            // Create the file, if it does not exist..
-            $storageInstance = $this->createFile();
-        }
+        $storageInstance = $this->getRepository();
 
         // Check for existing tokens
         if (isset($storageInstance->{$key})) {
@@ -91,13 +84,7 @@ class ExpoFileDriver implements ExpoRepository
      */
     public function forget(string $key, string $value = null): bool
     {
-        $storageInstance = null;
-
-        try {
-            $storageInstance = $this->getRepository();
-        } catch (\Exception $e) {
-            return false;
-        }
+        $storageInstance = $storageInstance = $this->getRepository();
 
         // Delete a single token with this key and check if there are multiple tokens associated with this key
         if($value && isset($storageInstance->{$key}) && is_array($storageInstance->{$key}) && count($storageInstance->{$key}) > 0)
@@ -137,17 +124,17 @@ class ExpoFileDriver implements ExpoRepository
      * Gets the storage file contents and converts it into an object
      *
      * @return object
-     *
-     * @throws \Exception
      */
     private function getRepository()
     {
         if (!file_exists($this->storage)) {
-            throw new \Exception('Tokens storage file not found.');
+            $content = $this->createFile();
         }
-
-        $file = file_get_contents($this->storage);
-        return json_decode($file);
+        else {
+            $file = file_get_contents($this->storage);
+            $content = json_decode($file);
+        }
+        return $content;
     }
 
     /**

@@ -30,21 +30,15 @@ class ExpoRegistrar
      *
      * @throws ExpoRegistrarException
      *
-     * @return string
+     * @return bool True if $token has been stored else false
      */
-    public function registerInterest($interest, $token)
+    public function registerInterest($interest, $token): bool
     {
         if (! $this->isValidExpoPushToken($token)) {
             throw ExpoRegistrarException::invalidToken();
         }
 
-        $stored = $this->repository->store($interest, $token);
-
-        if (!$stored) {
-            throw ExpoRegistrarException::couldNotRegisterInterest();
-        }
-
-        return $token;
+        return $this->repository->store($interest, $token);
     }
 
     /**
@@ -59,11 +53,7 @@ class ExpoRegistrar
      */
     public function removeInterest($interest, $token = null)
     {
-        if (!$this->repository->forget($interest, $token)) {
-            throw ExpoRegistrarException::couldNotRemoveInterest();
-        }
-
-        return true;
+        return $this->repository->forget($interest, $token);
     }
 
     /**
@@ -95,10 +85,6 @@ class ExpoRegistrar
                     }
                 }
             }
-        }
-
-        if (empty($tokens)) {
-            throw ExpoRegistrarException::emptyInterests();
         }
 
         return $tokens;

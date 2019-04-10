@@ -76,15 +76,14 @@ class Expo
     /**
      * Send a notification via the Expo Push Notifications Api.
      *
-     * @param $interests
+     * @param array|string $interests
      * @param array $data
-     * @param bool $debug
      *
      * @throws ExpoException
      *
      * @return array|bool
      */
-    public function notify($interests, array $data, $debug = false)
+    public function notify($interests, array $data)
     {
         $postData = [];
 
@@ -92,51 +91,26 @@ class Expo
             $interests = [$interests];
         }
 
-        if (count($interests) == 0) {
-            throw new ExpoException('Interests array must not be empty.');
-        }
+        if (count($interests) > 0) {
 
-        // Gets the expo tokens for the interests
-        $recipients = $this->registrar->getInterests($interests);
+            // Gets the expo tokens for the interests
+            $recipients = $this->registrar->getInterests($interests);
 
-        foreach ($recipients as $token) {
-            $postData[] = $data + ['to' => $token];
-        }
-
-        $ch = $this->prepareCurl();
-
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-
-        $response = $this->executeCurl($ch);
-
-        // If the notification failed completely, throw an exception with the details
-        if (!$debug && $this->failedCompletely($response, $interests)) {
-            throw ExpoException::failedCompletelyException($response);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Determines if the request we sent has failed completely
-     *
-     * @param array $response
-     * @param array $interests
-     *
-     * @return bool
-     */
-    private function failedCompletely(array $response, array $interests)
-    {
-        $numberOfInterests = count($interests);
-        $numberOfFailures = 0;
-
-        foreach ($response as $item) {
-            if ($item['status'] === 'error') {
-                $numberOfFailures++;
+            foreach ($recipients as $token) {
+                $postData[] = $data + ['to' => $token];
             }
+
+            $ch = $this->prepareCurl();
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+
+            $responses = $this->executeCurl($ch);
+        }
+        else {
+            $responses = [];
         }
 
-        return $numberOfFailures === $numberOfInterests;
+        return $responses;
     }
 
     /**

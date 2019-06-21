@@ -75,6 +75,16 @@ class ExpoFileDriver implements ExpoRepository
     }
 
     /**
+     * Return all keys stored in storage object.
+     *
+     * @return array
+     */
+    public function getAllKeys(): array {
+        $storageInstance = $this->getRepository();
+        return array_keys((array) $storageInstance);
+    }
+
+    /**
      * Removes an Expo token with a given identifier
      *
      * @param string $key
